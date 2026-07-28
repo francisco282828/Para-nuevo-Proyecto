@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Artefactos</title>
+<style>
+  :root{
+    --bg:#160f1e;
+    --bg-soft:#1c1526;
+    --surface:#241b30;
+    --surface-2:#2b2138;
+    --border:rgba(201,168,120,0.14);
+    --border-strong:rgba(201,168,120,0.4);
+    --gold:#c9a878;
+    --gold-bright:#e7c896;
+    --gold-wash:rgba(201,168,120,0.12);
+    --teal:#57d9c4;
+    --teal-wash:rgba(87,217,196,0.12);
+    --text:#f3ece0;
+    --text-muted:#ab9cba;
+    --text-dim:#786a8a;
+    --mono:ui-monospace,'JetBrains Mono','SFMono-Regular',Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  }
+
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(ellipse 900px 500px at 15% -10%, rgba(201,168,120,0.08), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 100% 0%, rgba(87,217,196,0.06), transparent 55%),
+      var(--bg);
+    color:var(--text);
+    font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+
+  ::selection{ background:var(--gold-wash); color:var(--gold-bright); }
+
+  .shell{ max-width:1000px; margin:36px auto 80px; padding:0 20px; }
+
+  .window{
+    border:1px solid var(--border);
+    border-radius:14px;
+    background:var(--bg-soft);
+    box-shadow:0 40px 90px -30px rgba(0,0,0,0.6);
+    overflow:hidden;
+  }
+
+  .titlebar{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:13px 18px;
+    background:linear-gradient(180deg, var(--surface-2), var(--bg-soft));
+    border-bottom:1px solid var(--border);
+  }
+  .dot{width:10px;height:10px;border-radius:50%;opacity:.55;}
+  .dot.r{background:#e0716b;} .dot.y{background:#e0c06b;} .dot.g{background:#6bc98a;}
+  .titlebar span.name{
+    margin-left:8px;
+    font-family:var(--mono);
+    font-size:12.5px;
+    color:var(--text-dim);
+    letter-spacing:.02em;
+  }
+
+  .body-pad{ padding:44px clamp(20px, 4vw, 56px) 20px; }
+
+  .prompt-line{
+    font-family:var(--mono);
+    font-size:13.5px;
+    color:var(--teal);
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-bottom:18px;
+  }
+  .prompt-line .sym{ color:var(--gold); }
+  .cursor{
+    display:inline-block;
+    width:8px; height:16px;
+    background:var(--gold-bright);
+    margin-left:2px;
+    animation:blink 1.05s steps(1) infinite;
+    vertical-align:-2px;
+  }
+  @keyframes blink{ 50%{opacity:0;} }
+
+  h1{
+    font-family:var(--mono);
+    font-weight:700;
+    font-size:clamp(28px, 4.4vw, 44px);
+    line-height:1.12;
+    margin:0 0 16px;
+    letter-spacing:-0.01em;
+  }
+  h1 .accent{ color:var(--gold-bright); }
+
+  .lede{
+    max-width:620px;
+    color:var(--text-muted);
+    font-size:15.5px;
+    line-height:1.65;
+    margin:0 0 38px;
+  }
+
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(300px, 1fr));
+    gap:14px;
+  }
+
+  .card{
+    display:block;
+    text-decoration:none;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:22px 20px 20px;
+    transition:border-color .18s, transform .18s, background .18s;
+  }
+  .card:hover{
+    border-color:var(--border-strong);
+    background:var(--surface-2);
+    transform:translateY(-2px);
+  }
+  .card:focus-visible{ outline:2px solid var(--gold-bright); outline-offset:3px; }
+
+  .card .tag{
+    display:inline-block;
+    font-family:var(--mono);
+    font-size:10px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--teal);
+    background:var(--teal-wash);
+    padding:4px 9px;
+    border-radius:5px;
+    margin-bottom:14px;
+  }
+  .card h2{
+    font-family:var(--mono);
+    font-weight:600;
+    font-size:16px;
+    color:var(--gold-bright);
+    margin:0 0 9px;
+    line-height:1.3;
+  }
+  .card p{
+    font-size:13.5px;
+    line-height:1.55;
+    color:var(--text-muted);
+    margin:0 0 14px;
+  }
+  .card .meta{
+    font-family:var(--mono);
+    font-size:11.5px;
+    color:var(--text-dim);
+    display:flex;
+    justify-content:space-between;
+    gap:10px;
+  }
+  .card .meta .go{ color:var(--gold); }
+
+  .empty{
+    border:1px dashed var(--border);
+    border-radius:12px;
+    padding:60px 20px;
+    text-align:center;
+    font-family:var(--mono);
+    font-size:14px;
+    color:var(--text-dim);
+  }
+  .empty .sym{ color:var(--gold); }
+
+  footer{
+    margin-top:50px;
+    padding-top:22px;
+    border-top:1px solid var(--border);
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--text-dim);
+    display:flex;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:10px;
+  }
+  footer .sym{ color:var(--gold); }
+
+  @media (prefers-reduced-motion: reduce){
+    .cursor{ animation:none; }
+    .card{ transition:none; }
+  }
+
+  @media (max-width:560px){
+    .body-pad{ padding:32px 18px 16px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <div class="window">
+    <div class="titlebar">
+      <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+      <span class="name">artefactos — index.html</span>
+    </div>
+
+    <div class="body-pad">
+
+      <div class="prompt-line"><span class="sym">&gt;</span> ls ./artefactos<span class="cursor"></span></div>
+      <h1>Mis <span class="accent">artefactos</span></h1>
+      <p class="lede">
+        Colección de páginas y herramientas autocontenidas. Cada una vive en su propia
+        carpeta dentro de <code style="font-family:var(--mono);color:var(--gold-bright);">artefactos/</code>
+        y se abre directamente en el navegador, sin build ni dependencias.
+      </p>
+
+      <div class="grid" id="grid"></div>
+      <div class="empty" id="empty" hidden><span class="sym">$</span> todavía no hay artefactos aquí.</div>
+
+      <footer>
+        <span><span class="sym">#</span> para añadir uno: crea artefactos/&lt;nombre&gt;/index.html y regístralo en ARTEFACTOS</span>
+        <span id="count"></span>
+      </footer>
+
+    </div>
+  </div>
+</div>
+
+<script>
+// Registro de artefactos. Añade una entrada por cada carpeta nueva en artefactos/.
+const ARTEFACTOS = [
+  {
+    slug: "comandos-claude-code",
+    titulo: "Comandos de Claude Code",
+    descripcion: "Catálogo interactivo de los 58 comandos slash, con qué hace cada uno, cuándo usarlo y un tip. Buscador en vivo y filtros por categoría.",
+    etiqueta: "referencia",
+    fecha: "2026-07"
+  },
+];
+
+function esc(str){
+  return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function render(){
+  const grid = document.getElementById('grid');
+  const empty = document.getElementById('empty');
+
+  document.getElementById('count').textContent =
+    ARTEFACTOS.length + (ARTEFACTOS.length === 1 ? ' artefacto' : ' artefactos');
+
+  if(ARTEFACTOS.length === 0){
+    grid.innerHTML = "";
+    empty.hidden = false;
+    return;
+  }
+  empty.hidden = true;
+
+  grid.innerHTML = ARTEFACTOS.map(a => `
+    <a class="card" href="artefactos/${esc(a.slug)}/">
+      <span class="tag">${esc(a.etiqueta)}</span>
+      <h2>${esc(a.titulo)}</h2>
+      <p>${esc(a.descripcion)}</p>
+      <div class="meta">
+        <span>${esc(a.fecha)}</span>
+        <span class="go">abrir &rarr;</span>
+      </div>
+    </a>
+  `).join('');
+}
+
+render();
+</script>
+</body>
+</html>
