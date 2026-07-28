@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Comandos de Claude Code</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#160f1e;
+    --bg-soft:#1c1526;
+    --surface:#241b30;
+    --surface-2:#2b2138;
+    --border:rgba(201,168,120,0.14);
+    --border-strong:rgba(201,168,120,0.4);
+    --gold:#c9a878;
+    --gold-bright:#e7c896;
+    --gold-wash:rgba(201,168,120,0.12);
+    --teal:#57d9c4;
+    --teal-wash:rgba(87,217,196,0.12);
+    --text:#f3ece0;
+    --text-muted:#ab9cba;
+    --text-dim:#786a8a;
+    --mono:'JetBrains Mono', ui-monospace, 'SFMono-Regular', monospace;
+    --sans:'Inter', -apple-system, sans-serif;
+  }
+
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:
+      radial-gradient(ellipse 900px 500px at 15% -10%, rgba(201,168,120,0.08), transparent 60%),
+      radial-gradient(ellipse 700px 500px at 100% 0%, rgba(87,217,196,0.06), transparent 55%),
+      var(--bg);
+    color:var(--text);
+    font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;
+    min-height:100vh;
+  }
+
+  ::selection{ background:var(--gold-wash); color:var(--gold-bright); }
+
+  /* ---------- terminal shell ---------- */
+  .shell{
+    max-width:1180px;
+    margin:36px auto 80px;
+    padding:0 20px;
+  }
+
+  .window{
+    border:1px solid var(--border);
+    border-radius:14px;
+    background:var(--bg-soft);
+    box-shadow:0 40px 90px -30px rgba(0,0,0,0.6);
+    overflow:hidden;
+  }
+
+  .titlebar{
+    display:flex;
+    align-items:center;
+    gap:10px;
+    padding:13px 18px;
+    background:linear-gradient(180deg, var(--surface-2), var(--bg-soft));
+    border-bottom:1px solid var(--border);
+  }
+  .dot{width:10px;height:10px;border-radius:50%;opacity:.55;}
+  .dot.r{background:#e0716b;} .dot.y{background:#e0c06b;} .dot.g{background:#6bc98a;}
+  .titlebar span{
+    margin-left:8px;
+    font-family:var(--mono);
+    font-size:12.5px;
+    color:var(--text-dim);
+    letter-spacing:.02em;
+  }
+
+  .body-pad{ padding:44px clamp(20px, 4vw, 56px) 20px; }
+
+  /* ---------- hero ---------- */
+  .prompt-line{
+    font-family:var(--mono);
+    font-size:13.5px;
+    color:var(--teal);
+    display:flex;
+    align-items:center;
+    gap:8px;
+    margin-bottom:18px;
+  }
+  .prompt-line .sym{color:var(--gold);}
+  .cursor{
+    display:inline-block;
+    width:8px; height:16px;
+    background:var(--gold-bright);
+    margin-left:2px;
+    animation:blink 1.05s steps(1) infinite;
+    vertical-align:-2px;
+  }
+  @keyframes blink{ 50%{opacity:0;} }
+
+  h1{
+    font-family:var(--mono);
+    font-weight:700;
+    font-size:clamp(28px, 4.4vw, 46px);
+    line-height:1.12;
+    margin:0 0 16px;
+    letter-spacing:-0.01em;
+  }
+  h1 .accent{ color:var(--gold-bright); }
+
+  .lede{
+    max-width:640px;
+    color:var(--text-muted);
+    font-size:15.5px;
+    line-height:1.65;
+    margin:0 0 34px;
+  }
+  .lede b{ color:var(--text); font-weight:600; }
+
+  /* ---------- search + filters ---------- */
+  .controls{
+    display:flex;
+    flex-wrap:wrap;
+    gap:12px;
+    align-items:center;
+    margin-bottom:14px;
+  }
+
+  .search{
+    position:relative;
+    flex:1 1 260px;
+    min-width:240px;
+  }
+  .search .sym{
+    position:absolute; left:16px; top:50%; transform:translateY(-50%);
+    font-family:var(--mono); color:var(--gold); font-size:14px; pointer-events:none;
+  }
+  .search input{
+    width:100%;
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:10px;
+    padding:13px 16px 13px 34px;
+    font-family:var(--mono);
+    font-size:14px;
+    color:var(--text);
+    outline:none;
+    transition:border-color .15s, background .15s;
+  }
+  .search input::placeholder{ color:var(--text-dim); }
+  .search input:focus{ border-color:var(--border-strong); background:var(--surface-2); }
+
+  .count{
+    font-family:var(--mono);
+    font-size:12.5px;
+    color:var(--text-dim);
+    white-space:nowrap;
+    padding:0 4px;
+  }
+  .count b{ color:var(--teal); font-weight:600; }
+
+  .pills{
+    display:flex;
+    flex-wrap:wrap;
+    gap:8px;
+    margin:18px 0 38px;
+  }
+  .pill{
+    font-family:var(--mono);
+    font-size:12px;
+    letter-spacing:.02em;
+    padding:8px 13px;
+    border-radius:999px;
+    border:1px solid var(--border);
+    background:transparent;
+    color:var(--text-muted);
+    cursor:pointer;
+    transition:all .15s;
+    white-space:nowrap;
+  }
+  .pill:hover{ border-color:var(--border-strong); color:var(--text); }
+  .pill.active{
+    background:var(--gold-wash);
+    border-color:var(--border-strong);
+    color:var(--gold-bright);
+  }
+  .pill .n{ opacity:.6; margin-left:5px; }
+
+  /* ---------- category sections ---------- */
+  .section-head{
+    display:flex;
+    align-items:baseline;
+    gap:10px;
+    margin:46px 0 16px;
+    padding-bottom:10px;
+    border-bottom:1px solid var(--border);
+  }
+  .section-head:first-of-type{ margin-top:0; }
+  .section-head .tag{
+    font-family:var(--mono);
+    font-size:11px;
+    letter-spacing:.14em;
+    text-transform:uppercase;
+    color:var(--teal);
+    background:var(--teal-wash);
+    padding:4px 9px;
+    border-radius:5px;
+  }
+  .section-head h2{
+    font-family:var(--sans);
+    font-weight:600;
+    font-size:15.5px;
+    color:var(--text);
+    margin:0;
+  }
+  .section-head .sub{
+    font-size:12.5px;
+    color:var(--text-dim);
+    margin-left:auto;
+  }
+
+  /* ---------- grid + cards ---------- */
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(300px, 1fr));
+    gap:14px;
+  }
+
+  .card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:12px;
+    padding:20px 20px 18px;
+    transition:border-color .18s, transform .18s, background .18s;
+  }
+  .card:hover{
+    border-color:var(--border-strong);
+    background:var(--surface-2);
+    transform:translateY(-2px);
+  }
+
+  .cmd{
+    display:inline-flex;
+    align-items:center;
+    gap:6px;
+    font-family:var(--mono);
+    font-weight:600;
+    font-size:15px;
+    color:var(--gold-bright);
+    background:var(--gold-wash);
+    padding:4px 9px 4px 7px;
+    border-radius:6px;
+    margin-bottom:14px;
+  }
+  .cmd .sym{ color:var(--gold); opacity:.8; font-weight:400; }
+
+  .field{ margin-bottom:11px; }
+  .field:last-child{ margin-bottom:0; }
+  .field .lbl{
+    display:block;
+    font-family:var(--mono);
+    font-size:10px;
+    letter-spacing:.13em;
+    text-transform:uppercase;
+    color:var(--text-dim);
+    margin-bottom:4px;
+  }
+  .field .val{
+    font-size:13.5px;
+    line-height:1.5;
+    color:var(--text-muted);
+  }
+  .field.tip .val{ color:var(--text); }
+  .field.tip .lbl{ color:var(--teal); }
+
+  .empty{
+    display:none;
+    text-align:center;
+    padding:70px 20px;
+    color:var(--text-dim);
+    font-family:var(--mono);
+    font-size:14px;
+  }
+  .empty.show{ display:block; }
+  .empty .sym{ color:var(--gold); }
+
+  footer{
+    margin-top:50px;
+    padding-top:22px;
+    border-top:1px solid var(--border);
+    font-family:var(--mono);
+    font-size:12px;
+    color:var(--text-dim);
+    display:flex;
+    justify-content:space-between;
+    flex-wrap:wrap;
+    gap:10px;
+  }
+  footer .sym{ color:var(--gold); }
+
+  @media (prefers-reduced-motion: reduce){
+    .cursor{ animation:none; }
+    .card{ transition:none; }
+  }
+
+  @media (max-width:560px){
+    .body-pad{ padding:32px 18px 16px; }
+    .section-head .sub{ display:none; }
+  }
+</style>
+</head>
+<body>
+
+<div class="shell">
+  <div class="window">
+    <div class="titlebar">
+      <span class="dot r"></span><span class="dot y"></span><span class="dot g"></span>
+      <span>claude-code — comandos.sh</span>
+    </div>
+
+    <div class="body-pad">
+
+      <div class="prompt-line"><span class="sym">&gt;</span> ls ~/comandos<span class="cursor"></span></div>
+      <h1>Comandos de <span class="accent">Claude Code</span></h1>
+      <p class="lede">
+        <b>58 comandos</b> reunidos a partir de tu propio menú de <code style="font-family:var(--mono);color:var(--gold-bright);">/</code>,
+        con qué hace cada uno, cuándo conviene usarlo y un tip para sacarle más provecho. Escribe para buscar o filtra por categoría.
+      </p>
+
+      <div class="controls">
+        <div class="search">
+          <span class="sym">$</span>
+          <input id="searchInput" type="text" placeholder="buscar comando, ej. 'diseño', 'seguridad', 'sesión'…" autocomplete="off">
+        </div>
+        <div class="count" id="countLabel"></div>
+      </div>
+
+      <div class="pills" id="pills"></div>
+
+      <div id="results"></div>
+      <div class="empty" id="emptyState"><span class="sym">$</span> sin coincidencias — prueba con otro término o quita el filtro de categoría.</div>
+
+      <footer>
+        <span><span class="sym">#</span> escribe /help en la terminal para ver la lista oficial y actualizada</span>
+        <span>lun, 27 de jul</span>
+      </footer>
+
+    </div>
+  </div>
+</div>
+
+<script>
+const DATA = [
+  // ---- Sesión y contexto ----
+  {cat:"sesion", name:"/teleport", what:"Retoma una sesión de Claude Code que empezaste en claude.ai.", when:"Cuando quieras seguir en la terminal un trabajo iniciado en el navegador.", tip:"Úsalo justo al abrir la terminal, antes de escribir cualquier otra cosa."},
+  {cat:"sesion", name:"/remote", what:"Controla esta sesión desde tu teléfono en claude.ai/code.", when:"Cuando necesites supervisar una tarea larga lejos del teclado.", tip:"Combínalo con /tasks para ver el avance sin volver a la laptop."},
+  {cat:"sesion", name:"/rename", what:"Cambia el nombre de la conversación actual.", when:"Cuando manejas varios proyectos a la vez y los nombres genéricos confunden.", tip:"Nómbrala por objetivo (\"fix-login-bug\"), no por fecha."},
+  {cat:"sesion", name:"/resume", what:"Reanuda una conversación anterior.", when:"Cuando quieras continuar un hilo de trabajo que dejaste a medias.", tip:"Revisa antes el /recap de esa sesión para recordar dónde quedaste."},
+  {cat:"sesion", name:"/rewind", what:"Restaura el código y/o la conversación a un punto anterior.", when:"Cuando un cambio salió mal y prefieres deshacerlo en vez de parchearlo.", tip:"Úsalo antes de pedir una corrección; es más limpio que apilar fixes."},
+  {cat:"sesion", name:"/recap", what:"Genera un resumen de una línea de la sesión, al instante.", when:"Antes de cerrar la terminal o cambiar de tarea.", tip:"Pégalo directo en tu changelog o standup diario."},
+  {cat:"sesion", name:"/tasks", what:"Muestra y administra todo lo que corre en segundo plano.", when:"Cuando lanzaste varios agentes o procesos y perdiste la cuenta.", tip:"Revísalo antes de cerrar sesión para no dejar nada corriendo."},
+  {cat:"sesion", name:"/subagent", what:"Envía un subagente con todo el contexto actual; el resultado vuelve aquí.", when:"Cuando una tarea es pesada y no quieres saturar la conversación principal.", tip:"Ideal para investigaciones largas que no necesitas seguir en vivo."},
+
+  // ---- Desarrollo y código ----
+  {cat:"dev", name:"/code-review", what:"Revisa el diff actual: bugs, limpieza y oportunidades de simplificar.", when:"Antes de hacer commit o abrir un pull request.", tip:"Usa nivel alto/ultra en cambios grandes; bajo para retoques rápidos."},
+  {cat:"dev", name:"/review", what:"Revisa un pull request de GitHub.", when:"Cuando necesitas evaluar cambios de otra persona antes de aprobar.", tip:"Para tu propio diff local, usa /code-review en su lugar."},
+  {cat:"dev", name:"/security-review", what:"Audita los cambios pendientes de la rama actual en busca de vulnerabilidades.", when:"Antes de un merge a producción o de un release.", tip:"Córrelo después de /code-review, no en su lugar."},
+  {cat:"dev", name:"/autofix-pr", what:"Vigila el PR actual y corrige automáticamente los problemas que surjan.", when:"Cuando quieres mantener un PR \"verde\" sin revisarlo constantemente.", tip:"Actívalo en PRs con muchos checks automáticos (CI, linters)."},
+  {cat:"dev", name:"/ultrareview", what:"Lanza un agente en la nube que busca y verifica bugs en tu rama (~5–10 min).", when:"Antes de un release importante, cuando vale la pena pagar por profundidad.", tip:"Tiene costo ($5–$25 USD); resérvalo para cambios de alto riesgo."},
+  {cat:"dev", name:"/run", what:"Compila y ejecuta la app para ver un cambio funcionando de verdad.", when:"Cuando pidas \"ejecuta\", \"inicia\" o \"toma una captura\" de la app.", tip:"Confirma que exista una skill run-<unit>; si no, créala con /run-skill-generator."},
+  {cat:"dev", name:"/run-skill-generator", what:"Crea o mejora la skill que enseña a los agentes a compilar y lanzar tu proyecto.", when:"La primera vez que configuras cómo se levanta el proyecto.", tip:"Verifica que los pasos funcionen desde un entorno limpio, no solo el tuyo."},
+  {cat:"dev", name:"/doctor", what:"Diagnostica el estado de tu instalación de Claude Code.", when:"Cuando algo no responde como debería o ves errores raros.", tip:"Revisa el reporte antes de reinstalar; suele señalar el archivo exacto en conflicto."},
+  {cat:"dev", name:"/init", what:"Crea un archivo CLAUDE.md con documentación del código fuente.", when:"Al empezar a trabajar en un repositorio nuevo.", tip:"Revísalo y ajústalo a mano después; es un punto de partida, no la versión final."},
+  {cat:"dev", name:"/fewer-permission-prompts", what:"Reduce las confirmaciones repetitivas de permisos.", when:"En sesiones largas de trabajo autónomo donde ya confías en los pasos.", tip:"Actívalo por proyecto, no de forma global, para no perder control en otros repos."},
+
+  // ---- Diseño e interfaz ----
+  {cat:"diseno", name:"/dataviz", what:"Guía para crear cualquier gráfico, panel o visualización de datos.", when:"Cada vez que el resultado incluya un gráfico, trazado o dashboard.", tip:"Aplica sin importar la librería: matplotlib, D3, Recharts, SVG o PNG."},
+  {cat:"diseno", name:"/design-sync", what:"Envía tu sistema de diseño React a claude.ai/design con el código real de tus componentes.", when:"Cuando quieras que Claude use tu design system en vez de uno genérico.", tip:"Actívalo diciendo \"sincroniza mi diseño con 21st\"."},
+  {cat:"diseno", name:"/21st-design-sync", what:"Publica el diseño del proyecto (CSS, Tailwind, tokens) como tema en 21st.dev.", when:"Cuando quieras compartir tu estilo visual con la comunidad.", tip:"Di \"publica mi tema\" y revisa la vista previa antes de confirmar."},
+  {cat:"diseno", name:"/21st-registry", what:"Administra tus componentes y temas publicados en 21st.dev desde la terminal.", when:"Para editar, actualizar o retirar algo que ya publicaste.", tip:"Sirve también para gestionar tu página de perfil público."},
+  {cat:"diseno", name:"/21st-ai", what:"Genera y ajusta interfaces con 21st AI a partir de una descripción.", when:"Cuando quieras un componente React/shadcn nuevo desde cero.", tip:"Itera en lenguaje natural sobre la vista previa antes de extraer el código final."},
+  {cat:"diseno", name:"/artifact-capabilities", what:"Muestra qué puede hacer un artifact en tiempo de ejecución: leer la página, mantener estado, republicarse.", when:"Antes de construir un artifact interactivo avanzado.", tip:"Consúltalo si tu artifact necesita \"recordar\" algo entre usos."},
+  {cat:"diseno", name:"/artifact-design", what:"Guía de diseño y buenas prácticas para construir artifacts.", when:"Cuando quieras que tu artifact se vea cuidado, no genérico.", tip:"Úsala junto con un brief claro del público y el propósito del artifact."},
+
+  // ---- Automatización y agentes ----
+  {cat:"auto", name:"/batch", what:"Planea un cambio grande y lo ejecuta en paralelo con 5 a 30 agentes aislados, cada uno con su propio PR.", when:"Para refactors masivos o cambios repetitivos en muchos archivos.", tip:"Revisa el plan antes de lanzar; es más fácil corregirlo ahí que en 30 PRs."},
+  {cat:"auto", name:"/schedule", what:"Crea, edita o lista agentes en la nube que corren solos según un horario (cron).", when:"Para tareas recurrentes, como revisar dependencias cada semana.", tip:"Empieza con una tarea de bajo riesgo antes de automatizar algo crítico."},
+  {cat:"auto", name:"/loop", what:"Repite un prompt o comando a intervalos fijos, por ejemplo /loop 5m/foo.", when:"Cuando el modelo debe avanzar por su cuenta a su propio ritmo.", tip:"Ajusta el intervalo según cuánto tarda cada paso, no dejes el valor por defecto."},
+  {cat:"auto", name:"/advisor", what:"Deja que Claude consulte un modelo más robusto en momentos clave.", when:"En decisiones difíciles dentro de una tarea larga y compleja.", tip:"Resérvalo para el punto de la tarea donde más se puede equivocar."},
+  {cat:"auto", name:"/claude-in-chrome", what:"Automatiza tu navegador Chrome: clics, formularios, capturas y lectura de consola.", when:"Para tareas web que requieren interactuar con páginas reales.", tip:"Revisa los permisos por sitio antes de dejarlo actuar sin supervisión."},
+  {cat:"auto", name:"/web-setup", what:"Configura Claude Code en la web usando tu cuenta de GitHub.", when:"La primera vez que usas Claude Code desde el navegador.", tip:"Hazlo una sola vez por cuenta; luego usa /teleport para retomar sesiones."},
+
+  // ---- Configuración y permisos ----
+  {cat:"config", name:"/statusline", what:"Configura qué información se muestra en la línea de estado.", when:"Cuando quieras ver siempre cierta info (rama, modelo, costo) sin pedirla.", tip:"Manténla corta; es lo primero que ves en cada línea de comando."},
+  {cat:"config", name:"/update-config", what:"Configura comportamientos automáticos (\"desde ahora haz X\") mediante hooks en settings.json.", when:"Cuando una regla necesita ejecutarse siempre, no solo recordarse.", tip:"Úsalo si notas que Claude \"olvida\" una instrucción del tipo \"cada vez que…\"."},
+  {cat:"config", name:"/permissions", what:"Administra qué herramientas puede usar Claude sin pedir confirmación.", when:"Al ajustar cuánta autonomía le das a Claude en un proyecto.", tip:"Sé más permisivo en repos de prueba y más estricto en producción."},
+  {cat:"config", name:"/add-dir", what:"Agrega un nuevo directorio de trabajo a la sesión.", when:"Cuando Claude necesita ver archivos fuera de la carpeta actual.", tip:"Muy útil en monorepos donde el código vive en varias carpetas."},
+  {cat:"config", name:"/agents", what:"Crea o administra subagentes especializados editando .claude/agents/.", when:"Cuando quieras roles reutilizables, como \"revisor de seguridad\" o \"tester\".", tip:"Dales un nombre y propósito claros; así Claude sabe cuándo invocarlos."},
+  {cat:"config", name:"/plan", what:"Activa el modo plan o revisa el plan de la sesión actual.", when:"Antes de tareas grandes, para validar el enfoque antes de ejecutar.", tip:"Pide ajustes al plan antes de decir \"adelante\"; corregir aquí sale más barato."},
+  {cat:"config", name:"/plugin", what:"Instala, actualiza o quita plugins de Claude Code.", when:"Cuando quieras extender funcionalidad sin escribir tu propia skill.", tip:"Después de instalar uno, corre /reload-plugins para activarlo en la sesión."},
+  {cat:"config", name:"/team-onboarding", what:"Genera una guía para tu equipo basada en tu propia forma de usar Claude Code.", when:"Al integrar a nuevas personas al equipo o proyecto.", tip:"Actualízala cada pocos meses; tus hábitos con la herramienta cambian rápido."},
+
+  // ---- Personalización y terminal ----
+  {cat:"personal", name:"/theme", what:"Cambia el tema visual de la terminal.", when:"Cuando quieras ajustar el look según tu gusto o la luz ambiente.", tip:"Prueba el modo claro si trabajas de día; el oscuro cansa menos de noche."},
+  {cat:"personal", name:"/terminal-setup", what:"Revisa la configuración de tu terminal, por ejemplo Shift+Enter nativo en Windows Terminal.", when:"Si algún atajo de teclado no responde como esperas.", tip:"Córrelo primero cuando cambies de máquina o de terminal."},
+  {cat:"personal", name:"/tui", what:"Define cómo se renderiza la interfaz en la terminal: predeterminado o pantalla completa.", when:"Cuando el layout se vea recortado o quieras más espacio visual.", tip:"Pantalla completa ayuda en sesiones largas con mucho output."},
+  {cat:"personal", name:"/scroll-speed", what:"Ajusta la velocidad de desplazamiento de la rueda del mouse.", when:"Si el scroll se siente demasiado rápido o lento.", tip:"Bájala si sueles pasarte de largo al revisar resultados extensos."},
+  {cat:"personal", name:"/privacy-settings", what:"Muestra y permite actualizar tu configuración de privacidad.", when:"Al querer confirmar qué datos se comparten y cómo.", tip:"Revísala después de cada actualización importante de Claude Code."},
+  {cat:"personal", name:"/remote-env", what:"Elige el entorno predeterminado donde corren los agentes en la nube.", when:"Antes de delegar tareas a agentes remotos.", tip:"Usa un entorno de prueba mientras defines permisos y variables."},
+  {cat:"personal", name:"/debug", what:"Activa el registro de depuración para la sesión actual.", when:"Cuando necesitas diagnosticar un problema puntual y difícil de explicar.", tip:"Apágalo al terminar; los logs detallados hacen más lenta la sesión."},
+  {cat:"personal", name:"/reload-plugins", what:"Aplica cambios pendientes de plugins sin reiniciar la sesión.", when:"Justo después de instalar o editar un plugin.", tip:"Evita reiniciar toda la terminal solo por esto."},
+  {cat:"personal", name:"/reload-skills", what:"Recoge las skills que añadiste o editaste en disco durante la sesión.", when:"Al crear o modificar una skill manualmente mientras trabajas.", tip:"Úsalo en vez de reiniciar cuando iteras rápido sobre una skill nueva."},
+
+  // ---- Cuenta y extras ----
+  {cat:"cuenta", name:"/usage", what:"Muestra el costo de la sesión, el uso del plan y estadísticas de actividad.", when:"Para monitorear cuánto estás consumiendo.", tip:"Revísalo antes de lanzar tareas costosas como /ultrareview o /batch."},
+  {cat:"cuenta", name:"/usage-credits", what:"Configura créditos de uso o los solicita a tu administrador.", when:"Cuando alcanzas un límite y necesitas seguir trabajando.", tip:"En equipos, defínelo con tu admin antes de que ocurra, no después."},
+  {cat:"cuenta", name:"/upgrade", what:"Sube al plan Max para límites más altos y más acceso a Opus.", when:"Si usas Claude Code de forma intensiva y chocas con límites seguido.", tip:"Revisa /usage primero para confirmar que el consumo lo justifica."},
+  {cat:"cuenta", name:"/powerup", what:"Aprende funciones de Claude Code con lecciones interactivas rápidas.", when:"Cuando quieras descubrir atajos que no conoces.", tip:"Buen primer comando para quien recién empieza."},
+  {cat:"cuenta", name:"/release-notes", what:"Muestra las notas de la versión más reciente.", when:"Después de una actualización, para saber qué cambió.", tip:"Revísalas si algo se comporta distinto de un día a otro."},
+  {cat:"cuenta", name:"/artifacts", what:"Explora artifacts publicados y compartidos por la comunidad.", when:"Cuando busques inspiración o un punto de partida reutilizable.", tip:"Úsalo antes de construir algo desde cero; puede que ya exista."},
+  {cat:"cuenta", name:"/skills", what:"Lista todas las skills disponibles en tu instalación.", when:"Para ver qué capacidades adicionales tienes activas.", tip:"Revísala si un comando esperado no aparece; puede faltar la skill."},
+  {cat:"cuenta", name:"/status", what:"Muestra versión, modelo, cuenta, conectividad de API y estado de herramientas.", when:"Como chequeo rápido de salud del sistema.", tip:"Primer comando útil cuando algo \"se siente raro\" pero no da error claro."},
+  {cat:"cuenta", name:"/stickers", what:"Pide stickers físicos de Claude Code.", when:"Cuando quieras algo de merch para tu laptop.", tip:"Es solo por diversión, no afecta tu proyecto."},
+  {cat:"cuenta", name:"/radio", what:"Reproduce la radio lo-fi de Claude FM mientras trabajas.", when:"Para tener ambiente sonoro durante sesiones largas de código.", tip:"Ideal de fondo mientras corres tareas largas como /batch o /ultrareview."},
+];
+
+const CATS = [
+  {key:"sesion",   label:"Sesión y contexto"},
+  {key:"dev",      label:"Desarrollo y código"},
+  {key:"diseno",   label:"Diseño e interfaz"},
+  {key:"auto",     label:"Automatización y agentes"},
+  {key:"config",   label:"Configuración y permisos"},
+  {key:"personal", label:"Personalización y terminal"},
+  {key:"cuenta",   label:"Cuenta y extras"},
+];
+
+let activeCat = "all";
+let query = "";
+
+function catCount(key){
+  return key === "all" ? DATA.length : DATA.filter(d => d.cat === key).length;
+}
+
+function renderPills(){
+  const pillsEl = document.getElementById('pills');
+  const all = [{key:"all", label:"Todos"}, ...CATS];
+  pillsEl.innerHTML = all.map(c => `
+    <button class="pill ${activeCat===c.key?'active':''}" data-key="${c.key}">
+      ${c.label}<span class="n">${catCount(c.key)}</span>
+    </button>
+  `).join('');
+  pillsEl.querySelectorAll('.pill').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      activeCat = btn.dataset.key;
+      renderPills();
+      renderResults();
+    });
+  });
+}
+
+function matches(item){
+  const inCat = activeCat === "all" || item.cat === activeCat;
+  if(!inCat) return false;
+  if(!query) return true;
+  const hay = (item.name + " " + item.what + " " + item.when + " " + item.tip).toLowerCase();
+  return hay.includes(query);
+}
+
+function renderResults(){
+  const container = document.getElementById('results');
+  const empty = document.getElementById('emptyState');
+  const filtered = DATA.filter(matches);
+
+  document.getElementById('countLabel').innerHTML = `<b>${filtered.length}</b> / ${DATA.length} comandos`;
+
+  if(filtered.length === 0){
+    container.innerHTML = "";
+    empty.classList.add('show');
+    return;
+  }
+  empty.classList.remove('show');
+
+  const groups = activeCat === "all" ? CATS : CATS.filter(c => c.key === activeCat);
+
+  container.innerHTML = groups.map(g => {
+    const items = filtered.filter(d => d.cat === g.key);
+    if(items.length === 0) return "";
+    return `
+      <div class="section-head">
+        <span class="tag">${g.key}</span>
+        <h2>${g.label}</h2>
+        <span class="sub">${items.length} comando${items.length===1?'':'s'}</span>
+      </div>
+      <div class="grid">
+        ${items.map(cardHTML).join('')}
+      </div>
+    `;
+  }).join('');
+}
+
+function esc(str){
+  return str.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function cardHTML(item){
+  return `
+    <div class="card">
+      <div class="cmd"><span class="sym">&gt;</span>${esc(item.name)}</div>
+      <div class="field">
+        <span class="lbl">Qué hace</span>
+        <div class="val">${esc(item.what)}</div>
+      </div>
+      <div class="field">
+        <span class="lbl">Cuándo usarla</span>
+        <div class="val">${esc(item.when)}</div>
+      </div>
+      <div class="field tip">
+        <span class="lbl">Tip</span>
+        <div class="val">${esc(item.tip)}</div>
+      </div>
+    </div>
+  `;
+}
+
+document.getElementById('searchInput').addEventListener('input', (e)=>{
+  query = e.target.value.trim().toLowerCase();
+  renderResults();
+});
+
+renderPills();
+renderResults();
+</script>
+</body>
+</html>
