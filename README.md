@@ -1,7 +1,11 @@
-# Artefactos
+# artefactos
 
-Repositorio dedicado a alojar mis artefactos: páginas y herramientas HTML
-autocontenidas, sin build ni dependencias externas.
+Galería de artefactos HTML autocontenidos: páginas y herramientas sin build ni
+dependencias externas.
+
+```
+git clone https://github.com/francisco282828/artefactos.git
+```
 
 ## Estructura
 
@@ -43,8 +47,8 @@ La galería se genera desde ese array, así que basta con esas dos cosas.
 ## Ver los artefactos
 
 Abre `index.html` en el navegador. Si en algún momento activas GitHub Pages
-(Settings → Pages → rama y carpeta `/`), la galería queda publicada en la raíz
-del sitio.
+(Settings → Pages → rama y carpeta `/`), la galería queda publicada en
+<https://francisco282828.github.io/artefactos/>.
 
 ## Artefactos actuales
 
