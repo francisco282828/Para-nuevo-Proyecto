@@ -27,12 +27,20 @@ Si de verdad no existe, créala en `root` y sigue.
 2. Antes de escribir, **verifica el estado real** — no lo cites de memoria:
    `git status`, `git log --oneline -5`, rama actual, si hay push o PR pendiente.
    Lo que creías al inicio de la sesión pudo cambiar.
-3. Crea el documento con `create_file`, `parentId` = la carpeta de arriba,
+3. **Confirma la fecha de hoy con `date -u`.** Una sesión larga puede cruzar
+   la medianoche, y la fecha del inicio del chat queda obsoleta. Fechar mal la
+   bitácora rompe el orden de la carpeta, que es su única forma de navegarse.
+4. Crea el documento con `create_file`, `parentId` = la carpeta de arriba,
    `contentMimeType: text/markdown` y **sin** `disableConversionToGoogleType`
    (Drive lo convierte a Google Doc con encabezados reales, legible en celular).
-4. Título: `AAAA-MM-DD — <tema en pocas palabras>`. Si ya hay una bitácora
-   de ese día sobre lo mismo, actualízala en vez de duplicar.
-5. Dale al usuario el `viewUrl` que devuelve la llamada.
+   El `fileSize: 1` de la respuesta es ruido, no significa que salió vacío.
+5. Título: `AAAA-MM-DD — <tema en pocas palabras>`.
+6. Dale al usuario el `viewUrl` que devuelve la llamada.
+
+**El conector de Drive solo tiene `create_file`: no puede editar ni borrar.**
+Así que no existe "actualizar una bitácora". Si ya hay una del mismo día sobre
+lo mismo, crea la nueva completa, marca al inicio cuál reemplaza, y dile al
+usuario que borre la vieja a mano. Nunca dejes dos vigentes sin decir cuál manda.
 
 ### Estructura
 
